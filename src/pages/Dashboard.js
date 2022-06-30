@@ -33,6 +33,8 @@ import MenuItem from "@mui/material/MenuItem";
 import Select from "@mui/material/Select";
 
 import Search from "@mui/icons-material/Search";
+import Moment from 'moment';
+
 
 const style = {
   position: "absolute",
@@ -50,15 +52,19 @@ const Dashboard = () => {
   const [cliente_selected, set_clienteSelected] = useState(null);
   const [statusSearch, set_statusSearch] = useState("");
 
-  const handleSelectChange = (event) => {
+  const handleSelectChange = async (event) => {
     set_statusSearch(event.target.value);
+    set_loading(true);
+    await handleSearchUserRepresentanteStatus(event.target.value);
+    set_loading(false);
   };
 
   const {
     userRepresentantes_Data,
     handleGetUserRepresentantes,
     handleSearchUserRepresentante,
-    handleSearchUserRepresentanteStatus
+    handleSearchUserRepresentanteStatus,
+    isLoading
   } = GetUserRepresentante();
 
   const { handleRepresentanteActivation, response } = useRepresentante();
@@ -73,7 +79,6 @@ const Dashboard = () => {
   function handleSearchChange(event) {
     event.preventDefault();
     setSearch(event.target.value.toLowerCase());
-    handleSearchUserRepresentanteStatus(search) 
   }
 
   useEffect(() => {
@@ -97,13 +102,18 @@ const Dashboard = () => {
 
   const handleClose = () => setOpen(false);
 
- 
-
   return (
     <>
       <Backdrop
         sx={{ color: "#fff", zIndex: (theme) => theme.zIndex.drawer + 1 }}
         open={loading}
+      >
+        <CircularProgress color="inherit" />
+      </Backdrop>
+
+      <Backdrop
+        sx={{ color: "#fff", zIndex: (theme) => theme.zIndex.drawer + 1 }}
+        open={isLoading}
       >
         <CircularProgress color="inherit" />
       </Backdrop>
@@ -166,10 +176,12 @@ const Dashboard = () => {
           sx={{
             display: "flex",
             justifyContent: "right",
+            mb: 5,
           }}
         >
           <Select
-            fullWidth={true}
+          sx={{width: 175}}
+            
             onChange={handleSelectChange}
             value={statusSearch}
             defaultValue={0}
@@ -190,10 +202,7 @@ const Dashboard = () => {
               id="filled-adornment-password"
               endAdornment={
                 <InputAdornment position="end">
-                  <IconButton
-                    aria-label="toggle password visibility"
-                    edge="end"
-                  ></IconButton>
+                  <IconButton edge="end"></IconButton>
                 </InputAdornment>
               }
             />
@@ -202,7 +211,7 @@ const Dashboard = () => {
             color="primary"
             aria-label="upload picture"
             component="span"
-            onClick={() =>  handleSearchUserRepresentante(search, statusSearch)}
+            onClick={() => handleSearchUserRepresentante(search, statusSearch)}
           >
             <Search />
           </IconButton>
@@ -235,15 +244,14 @@ const Dashboard = () => {
                     }}
                   >
                     <Typography fontSize={8}>
-                      ULTIMO ACESSO: {p.ULTIMOACESSO}
+                      ULTIMO ACESSO: {Moment(p.ULTIMOACESSO).format('DD-MM-YYYY')}
                     </Typography>
 
-                    {p.ATIVO == "0" ? (
+                    {p.ATIVO == "1" ? (
                       <Switch
-                        sx={{ color: "red" }}
                         checked={true}
                         onChange={(e) =>
-                          handleClienteActiveState(p.CodCliente, "1")
+                          handleClienteActiveState(p.CodCliente, "0")
                         }
                         inputProps={{ "aria-label": "controlled" }}
                       />
@@ -252,7 +260,7 @@ const Dashboard = () => {
                         color="error"
                         checked={false}
                         onChange={(e) =>
-                          handleClienteActiveState(p.CodCliente, "0")
+                          handleClienteActiveState(p.CodCliente, "1")
                         }
                         inputProps={{ "aria-label": "controlled" }}
                       />

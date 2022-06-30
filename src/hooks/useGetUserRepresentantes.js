@@ -5,6 +5,7 @@ import Cookies from "js-cookie";
 
 export function GetUserRepresentante() {
   const [userRepresentantes_Data, set_userRepresentantes_Data] = useState([]);
+  const [isLoading, set_isLoading] = useState(false);
 
   const handleGetUserRepresentantes = async () => {
     let res = null;
@@ -34,13 +35,14 @@ export function GetUserRepresentante() {
     }
 
     let IDREPRESENTANTE = representante.representante.IDREPRESENTANTE;
-
+    set_isLoading(true)
     res = await Api.post(`representante/cliente/search`, {
       IDREPRESENTANTE,
       userRepresentateData,
       status,
     });
     console.log(res.data);
+    set_isLoading(false)
     set_userRepresentantes_Data(res.data.clientes);
   };
 
@@ -48,6 +50,7 @@ export function GetUserRepresentante() {
     let res = null;
 
     let representante = Cookies.get("token");
+
 
     if (representante) {
       representante = JSON.parse(representante);
@@ -65,6 +68,7 @@ export function GetUserRepresentante() {
     userRepresentantes_Data: userRepresentantes_Data,
     handleGetUserRepresentantes: handleGetUserRepresentantes,
     handleSearchUserRepresentante: handleSearchUserRepresentante,
-    handleSearchUserRepresentanteStatus: handleSearchUserRepresentanteStatus
+    handleSearchUserRepresentanteStatus: handleSearchUserRepresentanteStatus,
+    isLoading: isLoading
   };
 }
