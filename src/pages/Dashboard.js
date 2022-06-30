@@ -35,7 +35,6 @@ import Select from "@mui/material/Select";
 import Search from "@mui/icons-material/Search";
 import Moment from 'moment';
 
-
 const style = {
   position: "absolute",
   top: "50%",
@@ -53,10 +52,18 @@ const Dashboard = () => {
   const [statusSearch, set_statusSearch] = useState("");
 
   const handleSelectChange = async (event) => {
-    set_statusSearch(event.target.value);
-    set_loading(true);
-    await handleSearchUserRepresentanteStatus(event.target.value);
-    set_loading(false);
+
+
+    if (event.target.value == 3) {
+      set_statusSearch(3)
+    } else {
+      set_statusSearch(event.target.value);
+      set_loading(true);
+      await handleSearchUserRepresentanteStatus(event.target.value);
+      set_loading(false);
+    }
+
+
   };
 
   const {
@@ -82,6 +89,20 @@ const Dashboard = () => {
   }
 
   useEffect(() => {
+
+    const teste = async () => {
+      if (statusSearch == 3) {
+        set_loading(true);
+        console.log(statusSearch);
+        await handleGetUserRepresentantes()
+        set_loading(false);
+      }
+    }
+
+    teste()
+  }, [statusSearch]);
+
+  useEffect(() => {
     handleGetUserRepresentantes();
   }, []);
 
@@ -94,6 +115,7 @@ const Dashboard = () => {
     const HandleGetUserRepresentantes = async () => {
       set_loading(true);
       await handleGetUserRepresentantes();
+      set_statusSearch(0)
       set_loading(false);
     };
 
@@ -180,15 +202,14 @@ const Dashboard = () => {
           }}
         >
           <Select
-          sx={{width: 175}}
-            
+            sx={{ width: 150, height: 30 }}
+
             onChange={handleSelectChange}
             value={statusSearch}
-            defaultValue={0}
           >
-            <MenuItem value={0}>TODOS</MenuItem>
-            <MenuItem value={1}>ATIVO</MenuItem>
-            <MenuItem value={2}>DESATIVADO</MenuItem>
+            <MenuItem value={3}>TODOS</MenuItem>
+            <MenuItem value={0}>ATIVO</MenuItem>
+            <MenuItem value={1}>DESATIVADO</MenuItem>
           </Select>
         </Box>
 
@@ -223,15 +244,25 @@ const Dashboard = () => {
               key={p.CodCliente}
               sx={{ display: "flex", marginTop: 2, marginBottom: 2 }}
             >
-              <Card sx={{ width: "100%" }}>
+              <Card elevation={2} sx={{ width: "100%", border: '1px', borderColor: "black" }}>
                 <CardContent>
-                  <Typography fontSize={11}>
+                  <Box mb={2} sx={{ backgroundColor: '#1976d2', paddingTop: 2, paddingBottom: 2 }} >
+                    <Typography ml={2} color="white" fontSize={14}>
+                      {p.NomeRazaoSocial}
+                    </Typography>
+                  </Box>
+
+
+                  <Typography fontSize={13}>
                     CÓDIGO DO CLIENTE: {p.CodCliente}
                   </Typography>
-                  <Typography fontSize={11}>
+
+
+
+                  {/* <Typography fontSize={11}>
                     NOME DO CLIENTE: {p.NomeRazaoSocial}
-                  </Typography>
-                  <Typography fontSize={11}>
+                  </Typography> */}
+                  <Typography fontSize={13}>
                     RESPONSÁVEL: {p.Responsavel}
                   </Typography>
                 </CardContent>
@@ -243,15 +274,15 @@ const Dashboard = () => {
                       justifyContent: "space-between",
                     }}
                   >
-                    <Typography fontSize={8}>
-                      ULTIMO ACESSO: {Moment(p.ULTIMOACESSO).format('DD-MM-YYYY')}
+                    <Typography fontSize={10}>
+                      ULTIMO ACESSO: {Moment(p.ULTIMOACESSO).format('DD-MM-YYYY HH:mm')}
                     </Typography>
 
-                    {p.ATIVO == "1" ? (
+                    {p.ATIVO == "0" ? (
                       <Switch
                         checked={true}
                         onChange={(e) =>
-                          handleClienteActiveState(p.CodCliente, "0")
+                          handleClienteActiveState(p.CodCliente, "1")
                         }
                         inputProps={{ "aria-label": "controlled" }}
                       />
@@ -260,7 +291,7 @@ const Dashboard = () => {
                         color="error"
                         checked={false}
                         onChange={(e) =>
-                          handleClienteActiveState(p.CodCliente, "1")
+                          handleClienteActiveState(p.CodCliente, "0")
                         }
                         inputProps={{ "aria-label": "controlled" }}
                       />
@@ -269,8 +300,9 @@ const Dashboard = () => {
                 </CardContent>
                 <Divider />
                 <CardContent>
-                  <Box sx={{ display: "flex", justifyContent: "space-around" }}>
+                  <Box sx={{ display: "flex", justifyContent: "flex-start" }}>
                     <Link
+                      mr={2}
                       target="_blank"
                       rel="noopener noreferrer"
                       href={`https://api.whatsapp.com/send?phone=55${p.Telefone}`
@@ -281,6 +313,7 @@ const Dashboard = () => {
                       <img width={28} height={28} src={whatslogo} />
                     </Link>
                     <Link
+                      mr={2}
                       href={`tel:${p.Telefone}`
                         .replace("(", "")
                         .replace(")", "")

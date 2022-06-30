@@ -1,4 +1,4 @@
-import React, { useState, useEffect} from "react";
+import React, { useState, useEffect } from "react";
 import Button from "@mui/material/Button";
 import CssBaseline from "@mui/material/CssBaseline";
 import TextField from "@mui/material/TextField";
@@ -8,16 +8,22 @@ import Typography from "@mui/material/Typography";
 import Container from "@mui/material/Container";
 
 import { useAuth } from "../hooks/useAuth";
-import {Link } from "react-router-dom";
+import { Link } from "react-router-dom";
 
 import Cookies from "js-cookie";
+import Backdrop from "@mui/material/Backdrop";
+import CircularProgress from "@mui/material/CircularProgress";
+
+
 
 import AppLogo from "../components/appLogo";
 export default function Login() {
   const {
-    onLogin,  
+    onLogin,
     set_error,
     set_message,
+    isLoading
+
   } = useAuth();
 
   const [password, set_password] = useState("");
@@ -75,6 +81,13 @@ export default function Login() {
         }}
       >
         <AppLogo />
+
+        <Backdrop
+          sx={{ color: "#fff", zIndex: (theme) => theme.zIndex.drawer + 1 }}
+          open={isLoading}
+        >
+          <CircularProgress color="inherit" />
+        </Backdrop>
 
         <Box component="form" onSubmit={handleSubmit} sx={{ mt: 12 }}>
           <TextField

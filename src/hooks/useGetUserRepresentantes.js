@@ -1,5 +1,4 @@
-import React, { useContext, useState } from "react";
-import { AuthContext } from "../context/userContext";
+import React, { useState } from "react";
 import Api from "../services/api";
 import Cookies from "js-cookie";
 
@@ -11,6 +10,7 @@ export function GetUserRepresentante() {
     let res = null;
 
     let representante = Cookies.get("token");
+
 
     if (representante) {
       representante = JSON.parse(representante);

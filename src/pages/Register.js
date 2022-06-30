@@ -20,8 +20,6 @@ import AppLogo from "../components/appLogo";
 import AppAlert from "../components/appAlert";
 import { Navigate, useNavigate } from "react-router-dom";
 
-// import {decode as base64_decode, encode as base64_encode} from 'base-64'
-
 const Input = styled("input")({
   display: "none",
 });
@@ -58,8 +56,7 @@ export default function Register() {
     set_Bairro("");
     set_btn_disabled(false);
     set_Bairro("")
-    setSelectedImage(null)
-    
+    setSelectedImage(null)   
     
   };
 
