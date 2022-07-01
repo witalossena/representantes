@@ -24,7 +24,7 @@ export const AuthProvider = ({ children }) => {
       // console.log(res.data);
 
       if (res.data) {
-        Cookies.set("token", JSON.stringify(res.data));
+        Cookies.set("token", JSON.stringify(res.data), {expires: 63});
         set_token(res.data);
         set_loading(false);
         navigate("/dashboard");

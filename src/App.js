@@ -8,6 +8,7 @@ import DashboardPage from "./pages/Dashboard";
 
 // import { useAuth } from "./hooks/useAuth";
 import { RequireAuth } from "./hooks/useAuth";
+import AppClientCounter from "./components/AppClientCounter";
 // import { ProtectedRoute } from "./components/ProtectedRoute";
 
 const theme = createTheme();

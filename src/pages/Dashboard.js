@@ -17,12 +17,14 @@ import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import Typography from "@mui/material/Typography";
 import Divider from "@mui/material/Divider";
+import {  useNavigate } from "react-router-dom";
 import MenuAppBar from "../components/appbar";
 import Modal from "@mui/material/Modal";
 import { GetUserRepresentante } from "../hooks/useGetUserRepresentantes";
 import { useRepresentante } from "../hooks/useRepresentante";
 import Backdrop from "@mui/material/Backdrop";
 import CircularProgress from "@mui/material/CircularProgress";
+import logo from "../logo_sismega.jpeg";
 
 import Link from "@mui/material/Link";
 import Switch from "@mui/material/Switch";
@@ -33,7 +35,8 @@ import MenuItem from "@mui/material/MenuItem";
 import Select from "@mui/material/Select";
 
 import Search from "@mui/icons-material/Search";
-import Moment from 'moment';
+import Moment from "moment";
+import AppClientCounter from "../components/AppClientCounter";
 
 const style = {
   position: "absolute",
@@ -45,33 +48,30 @@ const style = {
   p: 4,
 };
 
+
+
 const Dashboard = () => {
   const [search, setSearch] = useState("");
   const [loading, set_loading] = useState(false);
   const [cliente_selected, set_clienteSelected] = useState(null);
-  const [statusSearch, set_statusSearch] = useState("");
+  const [statusSearch, set_statusSearch] = useState(0);
+  const navigate = useNavigate();
 
   const handleSelectChange = async (event) => {
-
-
-    if (event.target.value == 3) {
-      set_statusSearch(3)
-    } else {
-      set_statusSearch(event.target.value);
-      set_loading(true);
-      await handleSearchUserRepresentanteStatus(event.target.value);
-      set_loading(false);
-    }
-
-
+    set_statusSearch(event.target.value);
+    set_loading(true);
+    await handleSearchUserRepresentanteStatus(event.target.value);
+    set_loading(false);
   };
+
+
 
   const {
     userRepresentantes_Data,
     handleGetUserRepresentantes,
     handleSearchUserRepresentante,
     handleSearchUserRepresentanteStatus,
-    isLoading
+    isLoading,
   } = GetUserRepresentante();
 
   const { handleRepresentanteActivation, response } = useRepresentante();
@@ -88,35 +88,25 @@ const Dashboard = () => {
     setSearch(event.target.value.toLowerCase());
   }
 
-  useEffect(() => {
-
-    const teste = async () => {
-      if (statusSearch == 3) {
-        set_loading(true);
-        console.log(statusSearch);
-        await handleGetUserRepresentantes()
-        set_loading(false);
-      }
-    }
-
-    teste()
-  }, [statusSearch]);
-
-  useEffect(() => {
-    handleGetUserRepresentantes();
-  }, []);
-
   const handleClienteActiveState = (CODCLIENTE, ATIVADESATIVA) => {
     set_loading(true);
     handleRepresentanteActivation(CODCLIENTE, ATIVADESATIVA);
+    window.location.reload(true);
+    
+  
   };
 
   useEffect(() => {
+    handleSearchUserRepresentanteStatus(0);
+  }, []);
+
+  useEffect(() => {
     const HandleGetUserRepresentantes = async () => {
+
       set_loading(true);
-      await handleGetUserRepresentantes();
-      set_statusSearch(0)
+      await handleSearchUserRepresentanteStatus(0);
       set_loading(false);
+
     };
 
     HandleGetUserRepresentantes();
@@ -185,14 +175,19 @@ const Dashboard = () => {
         <CssBaseline />
         <Box
           sx={{
-            mb: 3,
+            mb: 5,
             display: "flex",
             justifyContent: "center",
             flexDirection: "column",
             alignItems: "center",
           }}
         >
-          <AppLogo />
+          <>
+            <img style={{ width: "100px" }} src={logo} />
+            <Typography mt={2} component="h1" variant="h5">
+              representação de sucesso
+            </Typography>
+          </>
         </Box>
         <Box
           sx={{
@@ -203,7 +198,6 @@ const Dashboard = () => {
         >
           <Select
             sx={{ width: 150, height: 30 }}
-
             onChange={handleSelectChange}
             value={statusSearch}
           >
@@ -240,98 +234,112 @@ const Dashboard = () => {
 
         {userRepresentantes_Data ? (
           userRepresentantes_Data.map((p) => (
-            <Box
-              key={p.CodCliente}
-              sx={{ display: "flex", marginTop: 2, marginBottom: 2 }}
-            >
-              <Card elevation={2} sx={{ width: "100%", border: '1px', borderColor: "black" }}>
-                <CardContent>
-                  <Box mb={2} sx={{ backgroundColor: '#1976d2', paddingTop: 2, paddingBottom: 2 }} >
-                    <Typography ml={2} color="white" fontSize={14}>
-                      {p.NomeRazaoSocial}
+            <>
+              <Box
+                key={p.CodCliente}
+                sx={{ display: "flex", marginTop: 2, marginBottom: 2 }}
+              >
+                <Card
+                  elevation={2}
+                  sx={{ width: "100%", border: "1px", borderColor: "black" }}
+                >
+                  <CardContent>
+                    <Box
+                      mb={2}
+                      sx={{
+                        backgroundColor: "#1976d2",
+                        paddingTop: 2,
+                        paddingBottom: 2,
+                      }}
+                    >
+                      <Typography ml={2} color="white" fontSize={14}>
+                        {p.NomeRazaoSocial}
+                      </Typography>
+                    </Box>
+
+                    <Typography fontSize={13}>
+                      CÓDIGO DO CLIENTE: {p.CodCliente}
                     </Typography>
-                  </Box>
 
-
-                  <Typography fontSize={13}>
-                    CÓDIGO DO CLIENTE: {p.CodCliente}
-                  </Typography>
-
-
-
-                  {/* <Typography fontSize={11}>
+                    {/* <Typography fontSize={11}>
                     NOME DO CLIENTE: {p.NomeRazaoSocial}
                   </Typography> */}
-                  <Typography fontSize={13}>
-                    RESPONSÁVEL: {p.Responsavel}
-                  </Typography>
-                </CardContent>
-                <CardContent>
-                  <Box
-                    sx={{
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "space-between",
-                    }}
-                  >
-                    <Typography fontSize={10}>
-                      ULTIMO ACESSO: {Moment(p.ULTIMOACESSO).format('DD-MM-YYYY HH:mm')}
+                    <Typography fontSize={13}>
+                      RESPONSÁVEL: {p.Responsavel}
                     </Typography>
-
-                    {p.ATIVO == "0" ? (
-                      <Switch
-                        checked={true}
-                        onChange={(e) =>
-                          handleClienteActiveState(p.CodCliente, "1")
-                        }
-                        inputProps={{ "aria-label": "controlled" }}
-                      />
-                    ) : (
-                      <Switch
-                        color="error"
-                        checked={false}
-                        onChange={(e) =>
-                          handleClienteActiveState(p.CodCliente, "0")
-                        }
-                        inputProps={{ "aria-label": "controlled" }}
-                      />
-                    )}
-                  </Box>
-                </CardContent>
-                <Divider />
-                <CardContent>
-                  <Box sx={{ display: "flex", justifyContent: "flex-start" }}>
-                    <Link
-                      mr={2}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      href={`https://api.whatsapp.com/send?phone=55${p.Telefone}`
-                        .replace("(", "")
-                        .replace(")", "")
-                        .replace("-", "")}
+                    <Typography fontSize={13}>
+                      CNPJ/CPF: {p.CPFCNPJ}
+                    </Typography>
+                  </CardContent>
+                  <CardContent>
+                    <Box
+                      sx={{
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "space-between",
+                      }}
                     >
-                      <img width={28} height={28} src={whatslogo} />
-                    </Link>
-                    <Link
-                      mr={2}
-                      href={`tel:${p.Telefone}`
-                        .replace("(", "")
-                        .replace(")", "")
-                        .replace("-", "")}
-                    >
-                      <img width={28} height={28} src={phoneLogo} />
-                    </Link>
+                      <Typography fontSize={10}>
+                        ULTIMO ACESSO:{" "}
+                        {Moment(p.ULTIMOACESSO).format("DD-MM-YYYY HH:mm")}
+                      </Typography>
 
-                    <img
-                      width={28}
-                      height={28}
-                      src={plus}
-                      onClick={() => handleOpen(p)}
-                    />
-                  </Box>
-                </CardContent>
-              </Card>
-            </Box>
+                      {p.ATIVO == "0" ? (
+                        <Switch
+                          checked={true}
+                          onChange={(e) =>
+                            handleClienteActiveState(p.CodCliente, "1")
+                          }
+                          inputProps={{ "aria-label": "controlled" }}
+                        />
+                      ) : (
+                        <Switch
+                          color="error"
+                          checked={false}
+                          onChange={(e) =>
+                            handleClienteActiveState(p.CodCliente, "0")
+                          }
+                          inputProps={{ "aria-label": "controlled" }}
+                        />
+                      )}
+                    </Box>
+                  </CardContent>
+                  <Divider />
+                  <CardContent>
+                    <Box sx={{ display: "flex", justifyContent: "flex-start" }}>
+                      <Link
+                        mr={2}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        href={`https://api.whatsapp.com/send?phone=55${p.Telefone}`
+                          .replace("(", "")
+                          .replace(")", "")
+                          .replace("-", "")}
+                      >
+                        <img width={28} height={28} src={whatslogo} />
+                      </Link>
+                      <Link
+                        mr={2}
+                        href={`tel:${p.Telefone}`
+                          .replace("(", "")
+                          .replace(")", "")
+                          .replace("-", "")}
+                      >
+                        <img width={28} height={28} src={phoneLogo} />
+                      </Link>
+
+                      <img
+                        width={28}
+                        height={28}
+                        src={plus}
+                        onClick={() => handleOpen(p)}
+                      />
+                    </Box>
+                  </CardContent>
+                </Card>
+              </Box>
+              <AppClientCounter countClients={userRepresentantes_Data.length} />
+            </>
           ))
         ) : (
           <>no data</>
