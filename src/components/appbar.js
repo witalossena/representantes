@@ -5,13 +5,12 @@ import Toolbar from "@mui/material/Toolbar";
 import Button from "@mui/material/Button";
 import Cookies from "js-cookie";
 import { useAuth } from "../hooks/useAuth";
+import { Typography } from "@mui/material";
 
 export default function ButtonAppBar() {
   const [token, set_tokenjs] = useState("");
 
-  const {
-    onLogout, 
-  } = useAuth();
+  const { onLogout } = useAuth();
 
   useEffect(() => {
     let token_cookie = Cookies.get("token");
@@ -28,8 +27,18 @@ export default function ButtonAppBar() {
   return (
     <Box sx={{ flexGrow: 1 }}>
       <AppBar position="static">
-        <Toolbar sx={{ display: "flex", justifyContent: "flex-end" }}> 
-          {token ? <Button onClick={handleLogout} color="inherit">Sair</Button> : null}
+        <Toolbar sx={{ display: "flex", justifyContent: "space-around" }}>
+          <Box sx={{width: '70%', textAlign: 'right'}}>     
+            <Typography>SISMEGA AUTOMAÇÃO</Typography>
+          </Box>
+
+          <Box  sx={{textAlign: 'right'}}>
+            {token ? (
+              <Button onClick={handleLogout} color="inherit">
+                Sair
+              </Button>
+            ) : null}
+          </Box>
         </Toolbar>
       </AppBar>
     </Box>
