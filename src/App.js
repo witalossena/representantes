@@ -5,6 +5,7 @@ import { Routes, Route } from "react-router-dom";
 import LoginPage from "./pages/Login";
 import RegisterPage from "./pages/Register";
 import DashboardPage from "./pages/Dashboard";
+import Dash2 from "./pages/dash2";
 
 // import { useAuth } from "./hooks/useAuth";
 import { RequireAuth } from "./hooks/useAuth";
@@ -24,7 +25,7 @@ function App() {
           path="/dashboard"
           element={
             <RequireAuth>
-              <DashboardPage />
+              <Dash2 />
             </RequireAuth>
           }
         />

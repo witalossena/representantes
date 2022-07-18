@@ -27,7 +27,7 @@ import Backdrop from "@mui/material/Backdrop";
 import CircularProgress from "@mui/material/CircularProgress";
 import logo from "../logo_sismega.jpeg";
 
-import {handleDataVencimento} from '../hooks/useUpdateDataVencimento';
+import { handleDataVencimento } from "../hooks/useUpdateDataVencimento";
 
 import Link from "@mui/material/Link";
 import Switch from "@mui/material/Switch";
@@ -47,7 +47,9 @@ import FormControlLabel from "@mui/material/FormControlLabel";
 import FormLabel from "@mui/material/FormLabel";
 import ReactPaginate from "react-paginate";
 
-
+import Stack from "@mui/material/Stack";
+import Snackbar from "@mui/material/Snackbar";
+import MuiAlert from "@mui/material/Alert";
 
 const style = {
   position: "absolute",
@@ -59,15 +61,19 @@ const style = {
   p: 4,
 };
 
-const Dashboard = () => {
+const Alert = React.forwardRef(function Alert(props, ref) {
+  return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
+});
+
+const Dash2 = () => {
   const [search, setSearch] = useState("");
   const [loading, set_loading] = useState(false);
   const [cliente_selected, set_clienteSelected] = useState(null);
   const [statusSearch, set_statusSearch] = useState(0);
   const navigate = useNavigate();
-  const [pageNumber, set_pageNumber] = useState(0)
+  const [pageNumber, set_pageNumber] = useState(0);
 
-  const usersPerPage = 10;
+  const usersPerPage = 30;
   const pagesVisited = pageNumber * usersPerPage;
 
   const handleSelectChange = async (event) => {
@@ -77,6 +83,8 @@ const Dashboard = () => {
     set_loading(false);
   };
 
+  const [openSucess, set_openSucess] = useState(false);
+
   const {
     userRepresentantes_Data,
     handleGetUserRepresentantes,
@@ -85,7 +93,7 @@ const Dashboard = () => {
     isLoading,
   } = GetUserRepresentante();
 
-  const {UpdateDataVencimento} = handleDataVencimento()
+  const { UpdateDataVencimento } = handleDataVencimento();
 
   const { handleRepresentanteActivation, response } = useRepresentante();
 
@@ -100,6 +108,7 @@ const Dashboard = () => {
 
   const handleOpenCalendar = (data) => {
     setOpenOpenCalendar(true);
+    set_clienteSelected(data);
   };
 
   function handleSearchChange(event) {
@@ -135,16 +144,158 @@ const Dashboard = () => {
 
   const handleChange = async (event) => {
     set_loading(true);
-    await UpdateDataVencimento(event.target.value)
-    set_loading(false);  
+    await UpdateDataVencimento(event.target.value, cliente_selected.CodCliente);
+    set_loading(false);
+    set_openSucess(true);
+    handleCloseCalendar(true);
+    set_clienteSelected(null);
+  
   };
 
   const displayData = userRepresentantes_Data
-  .slice(pagesVisited, pagesVisited + usersPerPage)
-  .map((userRepresentantes_Data) => {})
+    .slice(pagesVisited, pagesVisited + usersPerPage)
+    .map((p) => {
+      return (
+        <>
+          <Box
+            key={p.CodCliente}
+            sx={{ display: "flex", marginTop: 2, marginBottom: 2 }}
+          >
+            <Card
+              elevation={2}
+              sx={{ width: "100%", border: "1px", borderColor: "black" }}
+            >
+              <CardContent>
+                <Box
+                  mb={2}
+                  sx={{
+                    backgroundColor: "#1976d2",
+                    paddingTop: 2,
+                    paddingBottom: 2,
+                  }}
+                >
+                  <Typography ml={2} color="white" fontSize={14}>
+                    {p.NomeRazaoSocial}
+                  </Typography>
+                </Box>
+
+                <Typography fontSize={13}>
+                  CÓDIGO DO CLIENTE: {p.CodCliente}
+                </Typography>
+
+                {/* <Typography fontSize={11}>
+                    NOME DO CLIENTE: {p.NomeRazaoSocial}
+                  </Typography> */}
+                <Typography fontSize={13}>
+                  RESPONSÁVEL: {p.Responsavel}
+                </Typography>
+                <Typography fontSize={13}>CNPJ/CPF: {p.CPFCNPJ}</Typography>
+              </CardContent>
+              <CardContent>
+                <Box
+                  sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                  }}
+                >
+                  <Typography fontSize={10}>
+                    ULTIMO ACESSO:{" "}
+                    {Moment(p.ULTIMOACESSO).format("DD-MM-YYYY HH:mm")}
+                  </Typography>
+
+                  {p.ATIVO == "0" ? (
+                    <Switch
+                      checked={true}
+                      onChange={(e) =>
+                        handleClienteActiveState(p.CodCliente, "1")
+                      }
+                      inputProps={{ "aria-label": "controlled" }}
+                    />
+                  ) : (
+                    <Switch
+                      color="error"
+                      checked={false}
+                      onChange={(e) =>
+                        handleClienteActiveState(p.CodCliente, "0")
+                      }
+                      inputProps={{ "aria-label": "controlled" }}
+                    />
+                  )}
+                </Box>
+              </CardContent>
+              <Divider />
+              <CardContent>
+                <Box sx={{ display: "flex", justifyContent: "flex-start" }}>
+                  <Link
+                    mr={2}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    href={`https://api.whatsapp.com/send?phone=55${p.Telefone}`
+                      .replace("(", "")
+                      .replace(")", "")
+                      .replace("-", "")}
+                  >
+                    <img width={28} height={28} src={whatslogo} />
+                  </Link>
+                  <Link
+                    mr={2}
+                    href={`tel:${p.Telefone}`
+                      .replace("(", "")
+                      .replace(")", "")
+                      .replace("-", "")}
+                  >
+                    <img width={28} height={28} src={phoneLogo} />
+                  </Link>
+
+                  <Link onClick={() => handleOpen(p)}>
+                    <img width={28} height={28} src={plus} />
+                  </Link>
+
+                  <Link ml={2} onClick={() => handleOpenCalendar(p)}>
+                    <img width={28} height={28} src={calendar} />
+                  </Link>
+                </Box>
+              </CardContent>
+            </Card>
+          </Box>
+        </>
+      );
+    });
+
+  const pageCount = Math.ceil(userRepresentantes_Data.length / usersPerPage);
+
+  const changePage = ({ selected }) => {
+    set_pageNumber(selected);
+  };
+
+  const handleCloseSuccess = (event, reason) => {
+    if (reason === "clickaway") {
+      return;
+    }
+
+    set_openSucess(false);
+  };
 
   return (
     <>
+      <Stack sx={{ width: "100%"}}>
+        <Snackbar
+          open={openSucess}
+          autoHideDuration={6000}
+          onClose={handleCloseSuccess}        
+
+        >
+          <Alert
+            onClose={handleClose}
+            severity="success"
+            sx={{ width: "100%" }}
+          >
+            Dados alterado com sucesso
+          </Alert>
+        </Snackbar>
+      </Stack>
+
       <Backdrop
         sx={{ color: "#fff", zIndex: (theme) => theme.zIndex.drawer + 1 }}
         open={loading}
@@ -222,11 +373,7 @@ const Dashboard = () => {
                 value={value}
                 onChange={handleChange}
               >
-                <FormControlLabel
-                  value="1"
-                  control={<Radio />}
-                  label="1 mês"
-                />
+                <FormControlLabel value="1" control={<Radio />} label="1 mês" />
                 <FormControlLabel
                   value="3"
                   control={<Radio />}
@@ -247,7 +394,6 @@ const Dashboard = () => {
           </Box>
         </Box>
       </Modal>
-
       <MenuAppBar />
 
       <Container sx={{ mt: 6 }} component="main" maxWidth="xs">
@@ -311,122 +457,34 @@ const Dashboard = () => {
           </IconButton>
         </Box>
 
-    
+        {displayData}
+      </Container>
 
-        {userRepresentantes_Data ? (
-          userRepresentantes_Data.map((p) => (
-            <>
-              <Box
-                key={p.CodCliente}
-                sx={{ display: "flex", marginTop: 2, marginBottom: 2 }}
-              >
-                <Card
-                  elevation={2}
-                  sx={{ width: "100%", border: "1px", borderColor: "black" }}
-                >
-                  <CardContent>
-                    <Box
-                      mb={2}
-                      sx={{
-                        backgroundColor: "#1976d2",
-                        paddingTop: 2,
-                        paddingBottom: 2,
-                      }}
-                    >
-                      <Typography ml={2} color="white" fontSize={14}>
-                        {p.NomeRazaoSocial}
-                      </Typography>
-                    </Box>
-
-                    <Typography fontSize={13}>
-                      CÓDIGO DO CLIENTE: {p.CodCliente}
-                    </Typography>
-
-                    {/* <Typography fontSize={11}>
-                    NOME DO CLIENTE: {p.NomeRazaoSocial}
-                  </Typography> */}
-                    <Typography fontSize={13}>
-                      RESPONSÁVEL: {p.Responsavel}
-                    </Typography>
-                    <Typography fontSize={13}>CNPJ/CPF: {p.CPFCNPJ}</Typography>
-                  </CardContent>
-                  <CardContent>
-                    <Box
-                      sx={{
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "space-between",
-                      }}
-                    >
-                      <Typography fontSize={10}>
-                        ULTIMO ACESSO:{" "}
-                        {Moment(p.ULTIMOACESSO).format("DD-MM-YYYY HH:mm")}
-                      </Typography>
-
-                      {p.ATIVO == "0" ? (
-                        <Switch
-                          checked={true}
-                          onChange={(e) =>
-                            handleClienteActiveState(p.CodCliente, "1")
-                          }
-                          inputProps={{ "aria-label": "controlled" }}
-                        />
-                      ) : (
-                        <Switch
-                          color="error"
-                          checked={false}
-                          onChange={(e) =>
-                            handleClienteActiveState(p.CodCliente, "0")
-                          }
-                          inputProps={{ "aria-label": "controlled" }}
-                        />
-                      )}
-                    </Box>
-                  </CardContent>
-                  <Divider />
-                  <CardContent>
-                    <Box sx={{ display: "flex", justifyContent: "flex-start" }}>
-                      <Link
-                        mr={2}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        href={`https://api.whatsapp.com/send?phone=55${p.Telefone}`
-                          .replace("(", "")
-                          .replace(")", "")
-                          .replace("-", "")}
-                      >
-                        <img width={28} height={28} src={whatslogo} />
-                      </Link>
-                      <Link
-                        mr={2}
-                        href={`tel:${p.Telefone}`
-                          .replace("(", "")
-                          .replace(")", "")
-                          .replace("-", "")}
-                      >
-                        <img width={28} height={28} src={phoneLogo} />
-                      </Link>
-
-                      <Link onClick={() => handleOpen(p)}>
-                        <img width={28} height={28} src={plus} />
-                      </Link>
-
-                      <Link ml={2} onClick={() => handleOpenCalendar(p)}>
-                        <img width={28} height={28} src={calendar} />
-                      </Link>
-                    </Box>
-                  </CardContent>
-                </Card>
-              </Box>
-              <AppClientCounter countClients={userRepresentantes_Data.length} />
-            </>
-          ))
-        ) : (
-          <>no data</>
-        )}
+      <Container
+        maxWidth="xs"
+        sx={{
+          display: "flex",
+          width: "100%",
+          justifyContent: "center",
+        }}
+      >
+        <ReactPaginate
+          previousLabel={"Anterior"}
+          nextLabel={"Próximo"}
+          pageCount={pageCount}
+          onPageChange={changePage}
+          containerClassName={"paginationBttns"}
+          previousLinkClassName={"previousBttn"}
+          nextClassName="pageItem"
+          pageLinkClassName="page-link"
+          nextLinkClassName={"nextBttn"}
+          disabledClassName={"paginationDisabled"}
+          activeClassName={"paginationActive"}
+          pageRangeDisplayed={1}
+        />
       </Container>
     </>
   );
 };
 
-export default Dashboard;
+export default Dash2;
